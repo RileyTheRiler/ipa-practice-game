@@ -1,0 +1,244 @@
+/* Character Diff Styles */
+
+.character-diff {
+    margin: var(--spacing-md) 0;
+    padding: var(--spacing-md);
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+}
+
+.diff-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--spacing-sm);
+}
+
+.diff-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    font-family: var(--font-ipa);
+    font-size: 1.75rem;
+    padding: var(--spacing-md);
+}
+
+.diff-char {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 44px;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+    cursor: default;
+}
+
+/* Correct character */
+.diff-char.correct {
+    color: var(--color-success);
+    background: rgba(46, 204, 113, 0.15);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+/* Wrong character */
+.diff-char.wrong {
+    color: var(--color-error);
+    background: rgba(231, 76, 60, 0.15);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.diff-char.wrong .expected-char {
+    position: absolute;
+    bottom: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--color-success);
+    opacity: 0.8;
+}
+
+/* Missing character (should have been there) */
+.diff-char.missing {
+    background: rgba(243, 156, 18, 0.15);
+    border: 2px dashed rgba(243, 156, 18, 0.5);
+}
+
+.diff-char.missing .missing-char {
+    color: var(--color-warning);
+    opacity: 0.7;
+}
+
+/* Extra character (shouldn't be there) */
+.diff-char.extra {
+    color: var(--text-muted);
+    background: rgba(127, 140, 141, 0.15);
+    border: 1px solid rgba(127, 140, 141, 0.3);
+    text-decoration: line-through;
+}
+
+/* Legend */
+.diff-legend {
+    display: flex;
+    gap: var(--spacing-lg);
+    justify-content: center;
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-subtle);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.legend-item.correct .legend-dot {
+    background: var(--color-success);
+}
+
+.legend-item.wrong .legend-dot {
+    background: var(--color-error);
+}
+
+.legend-item.missing .legend-dot {
+    background: var(--color-warning);
+    border: 1px dashed currentColor;
+}
+
+.legend-item.extra .legend-dot {
+    background: var(--text-muted);
+}
+
+/* Phonetic Explanation */
+.phonetic-explanation {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--accent-primary);
+}
+
+.explanation-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.explanation-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.explanation-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: var(--spacing-sm);
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+}
+
+.explanation-symbols {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-family: var(--font-ipa);
+    font-size: 1.25rem;
+}
+
+.explanation-symbols .user-symbol {
+    color: var(--color-error);
+}
+
+.explanation-symbols .arrow {
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.explanation-symbols .correct-symbol {
+    color: var(--color-success);
+}
+
+.explanation-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.explanation-tip {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Partial Score Display */
+.partial-score {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin: var(--spacing-md) 0;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-card);
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+}
+
+.partial-score-value {
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+.partial-score-label {
+    color: var(--text-secondary);
+}
+
+/* Almost Right Message */
+.almost-right-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.2), rgba(230, 126, 34, 0.2));
+    border: 1px solid rgba(243, 156, 18, 0.4);
+    border-radius: var(--radius-full);
+    color: var(--color-warning);
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.almost-right-badge .badge-icon {
+    font-size: 1rem;
+}
+
+@media (max-width: 480px) {
+    .diff-display {
+        font-size: 1.25rem;
+    }
+
+    .diff-char {
+        min-width: 24px;
+        height: 36px;
+        padding: 2px 6px;
+    }
+
+    .diff-legend {
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+    }
+}

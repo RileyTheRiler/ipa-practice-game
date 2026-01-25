@@ -1,0 +1,241 @@
+/* Symbol Tutorial Styles */
+
+.symbol-tutorial-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 22, 40, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    padding: var(--spacing-lg);
+    animation: fadeIn 0.2s ease;
+}
+
+.symbol-tutorial-modal {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    max-width: 500px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: var(--spacing-xl);
+    position: relative;
+    animation: slideUp 0.3s ease;
+}
+
+/* Header */
+.tutorial-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.symbol-display {
+    font-family: var(--font-ipa);
+    font-size: 5rem;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: var(--spacing-md);
+    display: inline-block;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    border: 2px solid var(--border-subtle);
+}
+
+.symbol-display.vowel {
+    color: var(--color-vowel);
+    border-color: rgba(255, 107, 107, 0.3);
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.symbol-display.consonant {
+    color: var(--color-consonant);
+    border-color: rgba(78, 205, 196, 0.3);
+    background: rgba(78, 205, 196, 0.1);
+}
+
+.symbol-display.diacritic {
+    color: var(--color-diacritic);
+    border-color: rgba(255, 230, 109, 0.3);
+    background: rgba(255, 230, 109, 0.1);
+}
+
+.symbol-meta {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.type-badge,
+.category-badge {
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.type-badge.vowel {
+    background: rgba(255, 107, 107, 0.2);
+    color: var(--color-vowel);
+}
+
+.type-badge.consonant {
+    background: rgba(78, 205, 196, 0.2);
+    color: var(--color-consonant);
+}
+
+.type-badge.diacritic {
+    background: rgba(255, 230, 109, 0.2);
+    color: var(--color-diacritic);
+}
+
+.category-badge {
+    background: var(--bg-card);
+    color: var(--text-secondary);
+}
+
+/* Sections */
+.tutorial-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.tutorial-section .section-title {
+    font-size: 1.25rem;
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-primary);
+}
+
+.tutorial-section .section-content {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.tutorial-section .section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Example Word Card */
+.example-word-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+}
+
+.example-word {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.speak-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--accent-gradient);
+    border: none;
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.speak-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+}
+
+.speak-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.speak-btn.speaking {
+    animation: pulse 0.5s ease infinite;
+}
+
+/* Pronunciation Guide */
+.pronunciation-guide {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+}
+
+.mouth-tips {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.tip-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.tip-item span:last-child {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* Practice Words */
+.practice-words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.practice-word-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.practice-word-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-primary);
+}
+
+/* Close Button */
+.symbol-tutorial-modal .close-btn {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+}
+
+@media (max-width: 480px) {
+    .symbol-display {
+        font-size: 3.5rem;
+    }
+
+    .symbol-tutorial-modal {
+        padding: var(--spacing-lg);
+    }
+}

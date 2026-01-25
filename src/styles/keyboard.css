@@ -1,0 +1,303 @@
+/* IPA Keyboard Styles */
+
+.keyboard-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.keyboard-wrapper {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    backdrop-filter: blur(20px);
+}
+
+.keyboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.keyboard-title {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.keyboard-title::before {
+    content: '⌨️';
+}
+
+.shift-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.shift-toggle:hover {
+    border-color: var(--border-accent);
+    color: var(--text-primary);
+}
+
+.shift-toggle.active {
+    background: var(--accent-gradient);
+    border-color: transparent;
+    color: white;
+}
+
+.keyboard-section {
+    margin-bottom: var(--spacing-md);
+}
+
+.keyboard-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--spacing-sm);
+}
+
+.keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+}
+
+.keyboard-row:last-child {
+    margin-bottom: 0;
+}
+
+/* Individual Key Styles */
+.key {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    height: 48px;
+    padding: var(--spacing-sm);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-ipa);
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.key::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent-gradient);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.key:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-accent);
+    box-shadow: var(--shadow-glow);
+}
+
+.key:hover::before {
+    opacity: 0.1;
+}
+
+.key:active {
+    transform: translateY(0) scale(0.95);
+}
+
+.key.pressed {
+    animation: keyPress 0.15s ease;
+}
+
+@keyframes keyPress {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(0.9);
+        background: var(--accent-primary);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Key type colors */
+.key.vowel {
+    border-color: rgba(255, 107, 107, 0.3);
+    color: var(--color-vowel);
+}
+
+.key.vowel:hover {
+    border-color: var(--color-vowel);
+    box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+}
+
+.key.consonant {
+    border-color: rgba(78, 205, 196, 0.3);
+    color: var(--color-consonant);
+}
+
+.key.consonant:hover {
+    border-color: var(--color-consonant);
+    box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+}
+
+.key.diacritic {
+    border-color: rgba(255, 230, 109, 0.3);
+    color: var(--color-diacritic);
+}
+
+.key.diacritic:hover {
+    border-color: var(--color-diacritic);
+    box-shadow: 0 0 15px rgba(255, 230, 109, 0.3);
+}
+
+/* Special keys */
+.key.special {
+    min-width: 72px;
+    font-size: 0.875rem;
+    font-family: var(--font-ui);
+    color: var(--text-secondary);
+    background: var(--bg-card);
+}
+
+.key.special:hover {
+    color: var(--text-primary);
+}
+
+.key.backspace {
+    min-width: 80px;
+}
+
+.key.space {
+    min-width: 200px;
+    flex-grow: 1;
+    max-width: 300px;
+}
+
+.key.clear {
+    min-width: 72px;
+    color: var(--color-error);
+    border-color: rgba(231, 76, 60, 0.3);
+}
+
+.key.clear:hover {
+    border-color: var(--color-error);
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.3);
+}
+
+/* Keyboard legend */
+.keyboard-legend {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-subtle);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-dot.vowel {
+    background: var(--color-vowel);
+}
+
+.legend-dot.consonant {
+    background: var(--color-consonant);
+}
+
+.legend-dot.diacritic {
+    background: var(--color-diacritic);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .keyboard-wrapper {
+        padding: var(--spacing-md);
+    }
+
+    .key {
+        min-width: 36px;
+        height: 42px;
+        font-size: 1rem;
+    }
+
+    .key.special {
+        min-width: 56px;
+        font-size: 0.75rem;
+    }
+
+    .key.backspace {
+        min-width: 64px;
+    }
+
+    .key.space {
+        min-width: 120px;
+        max-width: 200px;
+    }
+
+    .keyboard-legend {
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+    }
+}
+
+@media (max-width: 480px) {
+    .key {
+        min-width: 28px;
+        height: 36px;
+        font-size: 0.875rem;
+        padding: var(--spacing-xs);
+    }
+
+    .keyboard-row {
+        gap: 2px;
+    }
+
+    .key.special {
+        min-width: 44px;
+        font-size: 0.625rem;
+    }
+}
