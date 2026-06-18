@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import TitleScreen from './components/TitleScreen';
 import GamePicker from './components/GamePicker';
 import QuizMenu from './components/QuizMenu';
 import MultipleChoiceGame from './components/MultipleChoiceGame';
@@ -11,7 +10,7 @@ import LiveCaptionMode from './components/LiveCaptionMode';
 import './index.css';
 
 function App() {
-    const [screen, setScreen] = useState('title');
+    const [screen, setScreen] = useState('home');
     const [gameMode, setGameMode] = useState('wordToIpa');
     const [currentLevel, setCurrentLevel] = useState('level1');
     const [results, setResults] = useState(null);
@@ -26,9 +25,6 @@ function App() {
     /** Pick the component for the active screen. */
     const renderScreen = () => {
         switch (screen) {
-            case 'title':
-                return <TitleScreen onStart={() => setScreen('home')} />;
-
             case 'home':
                 return (
                     <GamePicker
@@ -91,7 +87,12 @@ function App() {
                 );
 
             default:
-                return <TitleScreen onStart={() => setScreen('home')} />;
+                return (
+                    <GamePicker
+                        onPickHangman={() => setScreen('hangman')}
+                        onPickQuiz={() => setScreen('quizMenu')}
+                    />
+                );
         }
     };
 
