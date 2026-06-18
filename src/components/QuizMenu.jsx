@@ -9,6 +9,7 @@ export function QuizMenu({
     onStartGame,
     onStartTimedMode,
     onOpenLearnMode,
+    onOpenLiveCaption,
     onBack,
 }) {
     const levels = Object.entries(levelInfo);
@@ -40,6 +41,13 @@ export function QuizMenu({
                         <span className="quiz-special-text">
                             <strong>Learn Mode</strong>
                             <small>Symbol tutorials &amp; minimal pairs</small>
+                        </span>
+                    </button>
+                    <button className="quiz-special-card live" onClick={onOpenLiveCaption}>
+                        <span className="quiz-special-icon">🎙️</span>
+                        <span className="quiz-special-text">
+                            <strong>Live IPA Caption</strong>
+                            <small>Real-time speech-to-IPA</small>
                         </span>
                     </button>
                 </div>

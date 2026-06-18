@@ -7,6 +7,7 @@ import HangmanGame from './components/HangmanGame';
 import ResultsScreen from './components/ResultsScreen';
 import TimedMode from './components/TimedMode';
 import LearnMode from './components/LearnMode';
+import LiveCaptionMode from './components/LiveCaptionMode';
 import './index.css';
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
                         onStartGame={startQuiz}
                         onStartTimedMode={() => setScreen('timed')}
                         onOpenLearnMode={() => setScreen('learn')}
+                        onOpenLiveCaption={() => setScreen('liveCaption')}
                         onBack={() => setScreen('home')}
                     />
                 );
@@ -72,6 +74,9 @@ function App() {
 
             case 'learn':
                 return <LearnMode onBack={() => setScreen('quizMenu')} />;
+
+            case 'liveCaption':
+                return <LiveCaptionMode onBack={() => setScreen('quizMenu')} />;
 
             case 'results':
                 return (
