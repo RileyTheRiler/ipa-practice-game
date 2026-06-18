@@ -33,14 +33,14 @@ export function TitleScreen({ onStart }) {
                         <p>Type IPA symbols with ease using our custom keyboard</p>
                     </div>
                     <div className="feature-card animate-slideUp stagger-2">
-                        <span className="feature-icon">📈</span>
-                        <h3>Progressive Levels</h3>
-                        <p>Start simple and build up to complex transcriptions</p>
+                        <span className="feature-icon">⛄</span>
+                        <h3>IPA Hangman</h3>
+                        <p>Guess words and transcriptions sound by sound</p>
                     </div>
                     <div className="feature-card animate-slideUp stagger-3">
-                        <span className="feature-icon">🏆</span>
-                        <h3>Track Progress</h3>
-                        <p>Earn stars and unlock new challenges as you improve</p>
+                        <span className="feature-icon">📝</span>
+                        <h3>Quiz Practice</h3>
+                        <p>Multiple-choice drills with detailed explanations</p>
                     </div>
                 </div>
 

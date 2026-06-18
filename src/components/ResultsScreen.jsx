@@ -5,8 +5,6 @@ export function ResultsScreen({
     correctAnswers,
     wrongAnswers,
     bestStreak,
-    currentLevel,
-    levelProgress,
     onPlayAgain,
     onBackToMenu,
 }) {
