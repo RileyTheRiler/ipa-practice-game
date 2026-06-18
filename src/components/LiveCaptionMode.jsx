@@ -154,9 +154,11 @@ export function LiveCaptionMode({ onBack }) {
     return (
         <div className="live-caption-container">
             <header className="live-caption-header">
-                <button className="back-button" onClick={onBack}>
-                    ← Back to Menu
-                </button>
+                {onBack && (
+                    <button className="back-button" onClick={onBack}>
+                        ← Back to Menu
+                    </button>
+                )}
                 <h1 className="live-caption-title">🎙️ Live IPA Captions</h1>
             </header>
 
