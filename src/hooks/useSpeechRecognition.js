@@ -79,19 +79,17 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
     const [confidence, setConfidence] = useState(null);
 
     const recognitionRef = useRef(null);
-    // Track whether the user intends to keep listening, so we can auto-restart
-    // when the engine times out (it stops on its own after a pause).
+    // The user wants to keep listening: we recognize ONE utterance per session
+    // (non-continuous) and auto-restart for the next one while this is true.
     const keepAliveRef = useRef(false);
-    // Final text committed from PRIOR recognition sessions (i.e. everything from
-    // before the most recent auto-restart). The engine resets its results list
-    // on each restart, so we accumulate finalized text here across restarts.
+    // Everything finalized from PREVIOUS utterances. Each utterance is its own
+    // recognition session, so completed utterances accumulate here.
     const committedRef = useRef('');
-    // Final text for the CURRENT session. We rebuild this from the full results
-    // list on every result event rather than appending deltas — some mobile
-    // engines (notably Android Chrome) replay already-finalized results with a
-    // stale resultIndex, and delta-appending turns those replays into duplicated
-    // phrases. Rebuilding from scratch makes repeated events idempotent.
+    // The current utterance's finalized text, rebuilt from the session's results
+    // on every event so repeated/replayed result events stay idempotent.
     const sessionFinalRef = useRef('');
+    // Pending timer for re-arming the recognizer between utterances.
+    const restartTimerRef = useRef(null);
 
     // Lazily create and configure the recognition instance.
     const getRecognition = useCallback(() => {
@@ -99,7 +97,13 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
         if (recognitionRef.current) return recognitionRef.current;
 
         const recognition = new SpeechRecognition();
-        recognition.continuous = true;
+        // Non-continuous: recognize a single utterance per session, then stop.
+        // Continuous mode on mobile (notably Android Chrome) keeps one ever-
+        // growing results buffer that it replays and jumbles across phrases,
+        // producing duplicated / interleaved words. Capturing one utterance at
+        // a time and appending each cleanly is far more reliable; we re-arm the
+        // recognizer in onend to keep an effectively continuous experience.
+        recognition.continuous = false;
         recognition.interimResults = true;
         recognition.lang = lang;
         // Ask for several alternatives. The engine uses the extra hypotheses
@@ -108,12 +112,11 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
         recognition.maxAlternatives = 5;
 
         recognition.onresult = (event) => {
-            // Rebuild the whole session from the cumulative results list each
-            // time (idempotent), instead of appending only new results. Collect
-            // each finalized result as its own trimmed string so they can be
-            // joined with spaces (some engines omit separators, which otherwise
-            // glues words like "howhow") and de-duplicated (some engines emit
-            // the same final result twice in a row).
+            // Rebuild this utterance from its results each event (idempotent),
+            // instead of appending deltas. Collect each finalized result as its
+            // own trimmed string so they can be joined with spaces (some engines
+            // omit separators, which otherwise glues words like "howhow") and
+            // de-duplicated (some engines emit the same final result twice).
             const finals = [];
             let interim = '';
             let lastConfidence = null;
@@ -151,13 +154,19 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
             // onend (or replay) can't commit the same text twice.
             committedRef.current = mergeTranscript(committedRef.current, sessionFinalRef.current);
             sessionFinalRef.current = '';
-            // Auto-restart if the user hasn't explicitly stopped.
+            // Re-arm for the next utterance if the user hasn't stopped. Defer
+            // slightly: starting synchronously inside onend can throw
+            // InvalidStateError before the engine has fully released, which
+            // would silently end listening.
             if (keepAliveRef.current) {
-                try {
-                    recognition.start();
-                } catch {
-                    // start() throws if already started; ignore.
-                }
+                restartTimerRef.current = setTimeout(() => {
+                    if (!keepAliveRef.current) return;
+                    try {
+                        recognition.start();
+                    } catch {
+                        // start() throws if already started; ignore.
+                    }
+                }, 150);
             } else {
                 setListening(false);
             }
@@ -182,6 +191,10 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
 
     const stop = useCallback(() => {
         keepAliveRef.current = false;
+        if (restartTimerRef.current) {
+            clearTimeout(restartTimerRef.current);
+            restartTimerRef.current = null;
+        }
         const recognition = recognitionRef.current;
         if (recognition) recognition.stop();
         setListening(false);
@@ -206,6 +219,10 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
     useEffect(() => {
         return () => {
             keepAliveRef.current = false;
+            if (restartTimerRef.current) {
+                clearTimeout(restartTimerRef.current);
+                restartTimerRef.current = null;
+            }
             if (recognitionRef.current) {
                 try {
                     recognitionRef.current.stop();
