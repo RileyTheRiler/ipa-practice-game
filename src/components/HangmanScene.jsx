@@ -39,6 +39,7 @@ export function HangmanScene({ theme, wrongCount, status }) {
 }
 
 // A part vanishes per wrong guess; parts[0] disappears first.
+/** Renders the still-present emoji parts of a 'parts' theme. */
 function PartsScene({ theme, wrongCount }) {
     return (
         <>
@@ -63,6 +64,7 @@ function PartsScene({ theme, wrongCount }) {
 }
 
 // A single emoji travels toward a goal; reaching it (handled as "lost") loses.
+/** Renders a 'mover' theme: an emoji that advances toward a goal with a trail. */
 function MoverScene({ theme, wrongCount }) {
     const progress = wrongCount / MAX_WRONG; // 0..1
 

@@ -12,6 +12,12 @@
 export const MAX_WRONG = 8;
 
 // Lay 8 items out in two gentle rows (used by "collection" themes).
+/**
+ * Build evenly-spaced "parts" for a collection theme, arranged in two rows.
+ * @param {string[]} emojis - Exactly 8 emoji, one per wrong guess.
+ * @param {string} [size] - CSS font-size applied to each part.
+ * @returns {{emoji: string, x: number, y: number, size: string}[]}
+ */
 const clusterParts = (emojis, size = '2.6rem') => {
     const xs = [18, 39, 61, 82];
     return emojis.map((emoji, i) => ({
@@ -23,6 +29,12 @@ const clusterParts = (emojis, size = '2.6rem') => {
 };
 
 // Stack 8 items vertically (used by the sundae). Index 0 sits on top.
+/**
+ * Build vertically-stacked "parts" for a theme. Index 0 sits on top and is
+ * the first to vanish.
+ * @param {{emoji: string, size?: string}[]} items
+ * @returns {{emoji: string, x: number, y: number, size: string}[]}
+ */
 const stackParts = (items) =>
     items.map((item, i) => ({
         emoji: item.emoji,
@@ -152,5 +164,6 @@ export const hangmanThemes = [
     },
 ];
 
+/** @returns {object} a random scene theme for a new round. */
 export const getRandomTheme = () =>
     hangmanThemes[Math.floor(Math.random() * hangmanThemes.length)];

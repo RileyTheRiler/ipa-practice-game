@@ -15,8 +15,10 @@ const PHYSICAL_KEYMAP = { g: 'ɡ', r: 'ɹ' };
 
 const LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
+/** @param {string} ch @returns {boolean} whether a character is revealed for free. */
 const isStructural = (ch) => STRUCTURAL.has(ch);
 
+/** IPA Hangman: guess a hidden word or transcription one sound at a time. */
 export function HangmanGame({ onBack }) {
     const [direction, setDirection] = useState('wordToIpa'); // guess transcription
     const [level, setLevel] = useState('all');
@@ -121,8 +123,15 @@ export function HangmanGame({ onBack }) {
         const onKeyDown = (e) => {
             if (e.metaKey || e.ctrlKey || e.altKey) return;
 
+            // Don't hijack Enter/Space from a focused button/link/field.
+            const target = e.target;
+            const isInteractive =
+                target instanceof HTMLElement &&
+                (target.isContentEditable ||
+                    ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(target.tagName));
+
             if (status !== 'playing') {
-                if (e.key === 'Enter' || e.key === ' ') {
+                if (!isInteractive && (e.key === 'Enter' || e.key === ' ')) {
                     e.preventDefault();
                     startRound();
                 }
@@ -319,6 +328,7 @@ export function HangmanGame({ onBack }) {
     );
 }
 
+/** A labelled row of guess keys with hit/miss/disabled states. */
 function KeyRow({ label, symbols, guessed, targetSymbols, onGuess, type, upper }) {
     return (
         <div className="key-row-group">

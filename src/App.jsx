@@ -15,12 +15,14 @@ function App() {
     const [currentLevel, setCurrentLevel] = useState('level1');
     const [results, setResults] = useState(null);
 
+    /** Configure and launch a quiz session. */
     const startQuiz = (mode, level) => {
         setGameMode(mode);
         setCurrentLevel(level);
         setScreen('quizGame');
     };
 
+    /** Pick the component for the active screen. */
     const renderScreen = () => {
         switch (screen) {
             case 'title':
