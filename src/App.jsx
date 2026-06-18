@@ -36,8 +36,6 @@ function App() {
             case 'home':
                 return (
                     <GamePicker
-                        onPickHangman={() => setScreen('hangman')}
-                        onPickQuiz={() => setScreen('quizMenu')}
                         onPickLiveCaption={() => openLiveCaption('home')}
                     />
                 );
@@ -98,8 +96,6 @@ function App() {
             default:
                 return (
                     <GamePicker
-                        onPickHangman={() => setScreen('hangman')}
-                        onPickQuiz={() => setScreen('quizMenu')}
                         onPickLiveCaption={() => openLiveCaption('home')}
                     />
                 );
