@@ -118,16 +118,6 @@ export function LiveCaptionMode({ onBack }) {
         }
     };
 
-    const handleDownload = () => {
-        const blob = new Blob([buildExport()], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'ipa-transcript.txt';
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-
     const renderTokens = (tokens, interim = false) =>
         tokens.map((tok, idx) => {
             if (!tok.isWord) {
@@ -261,9 +251,6 @@ export function LiveCaptionMode({ onBack }) {
                         </button>
                         <button className="btn btn-secondary" onClick={handleCopy} disabled={!hasContent}>
                             Copy
-                        </button>
-                        <button className="btn btn-secondary" onClick={handleDownload} disabled={!hasContent}>
-                            Export
                         </button>
                         <label className="toggle-text">
                             <input
