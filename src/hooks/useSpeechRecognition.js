@@ -18,6 +18,25 @@ const SpeechRecognition =
         : null;
 
 /**
+ * Join a list of finalized result transcripts into one string, trimming each,
+ * dropping empties, and collapsing a result that is identical (case-insensitive)
+ * to the one immediately before it. Guarantees single-space separators so words
+ * are never glued together, and removes the "said once, shown twice in a row"
+ * artifact some engines produce by re-emitting the same final result.
+ */
+export function dedupeConsecutive(transcripts) {
+    const out = [];
+    for (const raw of transcripts) {
+        const s = (raw || '').trim();
+        if (!s) continue;
+        if (out.length === 0 || out[out.length - 1].toLowerCase() !== s.toLowerCase()) {
+            out.push(s);
+        }
+    }
+    return out.join(' ');
+}
+
+/**
  * Merge already-committed transcript text with the current recognition
  * session's finalized text, removing any replayed overlap.
  *
@@ -90,28 +109,32 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
 
         recognition.onresult = (event) => {
             // Rebuild the whole session from the cumulative results list each
-            // time (idempotent), instead of appending only new results.
+            // time (idempotent), instead of appending only new results. Collect
+            // each finalized result as its own trimmed string so they can be
+            // joined with spaces (some engines omit separators, which otherwise
+            // glues words like "howhow") and de-duplicated (some engines emit
+            // the same final result twice in a row).
+            const finals = [];
             let interim = '';
-            let sessionFinal = '';
             let lastConfidence = null;
             for (let i = 0; i < event.results.length; i += 1) {
                 const result = event.results[i];
                 const transcript = result[0].transcript;
                 if (result.isFinal) {
-                    sessionFinal += transcript;
+                    finals.push(transcript);
                     if (typeof result[0].confidence === 'number') {
                         lastConfidence = result[0].confidence;
                     }
                 } else {
-                    interim += transcript;
+                    interim += `${transcript} `;
                 }
             }
-            sessionFinalRef.current = sessionFinal.trim();
+            sessionFinalRef.current = dedupeConsecutive(finals);
             // Merge (not append) so words the engine replays at the start of a
             // restarted session are not duplicated.
             setFinalText(mergeTranscript(committedRef.current, sessionFinalRef.current));
             if (lastConfidence !== null) setConfidence(lastConfidence);
-            setInterimText(interim);
+            setInterimText(interim.trim());
         };
 
         recognition.onerror = (event) => {
