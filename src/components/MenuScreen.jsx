@@ -9,6 +9,7 @@ export function MenuScreen({
     onStartTimedMode,
     onStartDailyChallenge,
     onOpenLearnMode,
+    onOpenLiveCaption,
     unlockedLevels,
     levelProgress,
     bestStreak,
@@ -119,6 +120,22 @@ export function MenuScreen({
                         </div>
                         <button className="btn btn-secondary special-btn">
                             Learn
+                        </button>
+                    </div>
+
+                    {/* Live IPA Captions Card */}
+                    <div
+                        className="special-mode-card live-caption"
+                        onClick={() => onOpenLiveCaption?.()}
+                    >
+                        <div className="special-icon">🎙️</div>
+                        <div className="special-info">
+                            <h3>Live IPA Captions</h3>
+                            <p>Real-time speech → IPA transcription</p>
+                            <span className="special-meta">Speak and see the phonemes</span>
+                        </div>
+                        <button className="btn btn-secondary special-btn">
+                            Listen
                         </button>
                     </div>
                 </div>

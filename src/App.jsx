@@ -6,6 +6,7 @@ import MultipleChoiceGame from './components/MultipleChoiceGame';
 import ResultsScreen from './components/ResultsScreen';
 import TimedMode from './components/TimedMode';
 import LearnMode from './components/LearnMode';
+import LiveCaptionMode from './components/LiveCaptionMode';
 import { AchievementToastQueue } from './components/AchievementToast';
 import { checkAchievements } from './data/achievements';
 import './index.css';
@@ -56,6 +57,10 @@ function App() {
     setCurrentScreen('learn');
   };
 
+  const handleOpenLiveCaption = () => {
+    setCurrentScreen('liveCaption');
+  };
+
   const handleTimedModeEnd = (score, correctCount) => {
     // Check achievements for timed mode
     const unlocked = checkAchievements({
@@ -89,6 +94,7 @@ function App() {
             onStartTimedMode={handleStartTimedMode}
             onStartDailyChallenge={handleStartDailyChallenge}
             onOpenLearnMode={handleOpenLearnMode}
+            onOpenLiveCaption={handleOpenLiveCaption}
             unlockedLevels={state.unlockedLevels}
             levelProgress={state.levelProgress}
             bestStreak={state.bestStreak}
@@ -120,6 +126,13 @@ function App() {
       case 'learn':
         return (
           <LearnMode
+            onBack={() => setCurrentScreen('menu')}
+          />
+        );
+
+      case 'liveCaption':
+        return (
+          <LiveCaptionMode
             onBack={() => setCurrentScreen('menu')}
           />
         );
