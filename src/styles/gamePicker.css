@@ -9,7 +9,7 @@
 
 .game-picker-inner {
     width: 100%;
-    max-width: 900px;
+    max-width: 1080px;
 }
 
 .game-picker-header {
@@ -28,7 +28,7 @@
 
 .game-picker-cards {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: var(--spacing-xl);
 }
 
@@ -98,6 +98,10 @@
 
 .game-picker-card.hangman:hover {
     box-shadow: 0 8px 32px rgba(127, 212, 255, 0.18);
+}
+
+.game-picker-card.livecaption:hover {
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.18);
 }
 
 @media (max-width: 720px) {
