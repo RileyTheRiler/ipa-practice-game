@@ -1,5 +1,29 @@
 import { describe, it, expect } from 'vitest';
-import { mergeTranscript } from './useSpeechRecognition';
+import { mergeTranscript, dedupeConsecutive } from './useSpeechRecognition';
+
+describe('dedupeConsecutive', () => {
+    it('joins separate final results with single spaces (no gluing)', () => {
+        expect(dedupeConsecutive(['how', 'are', 'you'])).toBe('how are you');
+    });
+
+    it('collapses an immediately repeated final result', () => {
+        expect(dedupeConsecutive(['why', 'why'])).toBe('why');
+        expect(dedupeConsecutive(['how', 'how'])).toBe('how');
+    });
+
+    it('is case-insensitive and trims', () => {
+        expect(dedupeConsecutive([' How ', 'how', 'ARE'])).toBe('How ARE');
+    });
+
+    it('keeps non-adjacent repeats', () => {
+        expect(dedupeConsecutive(['are', 'you', 'are'])).toBe('are you are');
+    });
+
+    it('ignores empty / whitespace entries', () => {
+        expect(dedupeConsecutive(['', '  ', 'hello'])).toBe('hello');
+        expect(dedupeConsecutive([])).toBe('');
+    });
+});
 
 describe('mergeTranscript', () => {
     it('appends when there is no overlap (engine reset on restart)', () => {
