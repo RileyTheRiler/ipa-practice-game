@@ -28,6 +28,12 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
     // Track whether the user intends to keep listening, so we can auto-restart
     // when the engine times out (it stops on its own after a pause).
     const keepAliveRef = useRef(false);
+    // Transcript committed from previous (already-ended) recognition sessions.
+    const committedRef = useRef('');
+    // Finalized transcript from the *current* session. Recomputed from scratch
+    // on every result event so a single segment can never be counted twice
+    // (the source of the earlier word/phrase repetition bug).
+    const sessionFinalRef = useRef('');
 
     // Lazily create and configure the recognition instance.
     const getRecognition = useCallback(() => {
@@ -41,20 +47,24 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
         recognition.maxAlternatives = 1;
 
         recognition.onresult = (event) => {
+            // Rebuild this session's transcript from the full results list each
+            // time, rather than appending deltas. event.results is cumulative
+            // for the session, so iterating from 0 yields each final segment
+            // exactly once even if the engine re-fires or re-indexes results.
+            let sessionFinal = '';
             let interim = '';
-            let finalized = '';
-            for (let i = event.resultIndex; i < event.results.length; i += 1) {
+            for (let i = 0; i < event.results.length; i += 1) {
                 const result = event.results[i];
                 const transcript = result[0].transcript;
                 if (result.isFinal) {
-                    finalized += transcript;
+                    sessionFinal += transcript;
                 } else {
                     interim += transcript;
                 }
             }
-            if (finalized) {
-                setFinalText((prev) => (prev + ' ' + finalized.trim()).trim());
-            }
+            sessionFinalRef.current = sessionFinal.trim();
+            const combined = (committedRef.current + ' ' + sessionFinalRef.current).trim();
+            setFinalText(combined);
             setInterimText(interim);
         };
 
@@ -67,6 +77,12 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
 
         recognition.onend = () => {
             setInterimText('');
+            // Commit this session's finalized text so the next session starts
+            // with a fresh, empty results list.
+            if (sessionFinalRef.current) {
+                committedRef.current = (committedRef.current + ' ' + sessionFinalRef.current).trim();
+                sessionFinalRef.current = '';
+            }
             // Auto-restart if the user hasn't explicitly stopped.
             if (keepAliveRef.current) {
                 try {
@@ -105,6 +121,8 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
     }, []);
 
     const reset = useCallback(() => {
+        committedRef.current = '';
+        sessionFinalRef.current = '';
         setFinalText('');
         setInterimText('');
         setError(null);
