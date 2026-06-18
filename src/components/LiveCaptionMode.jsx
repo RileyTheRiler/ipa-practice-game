@@ -186,13 +186,6 @@ export function LiveCaptionMode({ onBack }) {
                         Phonetic Alphabet in real time.
                     </p>
 
-                    <div className="live-caption-disclaimer">
-                        ⚠️ The IPA shown is the <strong>predicted</strong> pronunciation of
-                        the word the recognizer detected — not an analysis of the speaker's
-                        actual production. For speech-sound-disorder or child speech work,
-                        click any word to correct it to what was really said.
-                    </div>
-
                     <div className="live-caption-options">
                         <label className="lc-option">
                             <span>Language</span>
