@@ -12,6 +12,10 @@
 //      precision for the ability to handle any word the ASR throws at us.
 
 import { wordDatabase } from '../data/wordDatabase';
+import { spanishProvider } from '../data/lang/es';
+
+// Resolve a BCP-47-ish lang tag (e.g. "en-US", "es-ES") to a provider key.
+const langKey = (lang) => (lang || 'en').slice(0, 2).toLowerCase();
 
 // --- High-frequency / irregular words that the rules handle poorly ---------
 // Broad General American transcriptions (no stress marks for the short ones).
@@ -85,8 +89,11 @@ const dictionary = (() => {
     return dict;
 })();
 
-// Expose dictionary size for UI ("X words known").
-export const getDictionarySize = () => Object.keys(dictionary).length;
+// Expose dictionary size for UI ("X words known"), per language.
+export const getDictionarySize = (lang = 'en') => {
+    if (langKey(lang) === 'es') return spanishProvider.size;
+    return Object.keys(dictionary).length;
+};
 
 // --- Rule-based fallback G2P ------------------------------------------------
 // Multi-character grapheme patterns are matched greedily, longest first.
@@ -172,7 +179,10 @@ function ruleBasedG2P(word) {
 
 // Transcribe a single token. Returns { ipa, source } where source is
 // 'dictionary' (accurate) or 'rules' (estimated).
-export function transcribeWord(token) {
+export function transcribeWord(token, lang = 'en') {
+    // Non-English languages dispatch to their own provider.
+    if (langKey(lang) === 'es') return spanishProvider.transcribeWord(token);
+
     const clean = token.toLowerCase().replace(/[^a-z']/g, '');
     if (!clean) return { ipa: '', source: 'none' };
 
@@ -199,12 +209,14 @@ export function transcribeWord(token) {
 
 // Transcribe a phrase / sentence into an array of word tokens, each with its
 // original text and IPA. Punctuation tokens are preserved as separators.
-export function transcribePhrase(text) {
+export function transcribePhrase(text, lang = 'en') {
     if (!text) return [];
-    const tokens = text.match(/[A-Za-z']+|[^A-Za-z'\s]+/g) || [];
+    // Letters include common accented characters so non-English words tokenize
+    // as a single word rather than splitting on diacritics.
+    const tokens = text.match(/[A-Za-zÀ-ÿ']+|[^A-Za-zÀ-ÿ'\s]+/g) || [];
     return tokens.map((tok) => {
-        if (/[A-Za-z]/.test(tok)) {
-            const { ipa, source } = transcribeWord(tok);
+        if (/[A-Za-zÀ-ÿ]/.test(tok)) {
+            const { ipa, source } = transcribeWord(tok, lang);
             return { text: tok, ipa, source, isWord: true };
         }
         return { text: tok, ipa: tok, source: 'punct', isWord: false };
@@ -212,8 +224,8 @@ export function transcribePhrase(text) {
 }
 
 // Convenience: a plain IPA string for a phrase (slash-delimited broad form).
-export function transcribePhraseToString(text) {
-    const parts = transcribePhrase(text)
+export function transcribePhraseToString(text, lang = 'en') {
+    const parts = transcribePhrase(text, lang)
         .map((t) => (t.isWord ? t.ipa : t.text))
         .filter(Boolean);
     // Tidy up spacing before closing punctuation (commas, periods, etc.).

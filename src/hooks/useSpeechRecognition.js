@@ -23,6 +23,10 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
     const [finalText, setFinalText] = useState('');
     const [interimText, setInterimText] = useState('');
     const [error, setError] = useState(null);
+    // Confidence (0–1) of the most recent finalized result. The Web Speech API
+    // does not expose per-word confidence, only per-result, so this is a
+    // coarse signal of how sure the recognizer was about the last chunk.
+    const [confidence, setConfidence] = useState(null);
 
     const recognitionRef = useRef(null);
     // Track whether the user intends to keep listening, so we can auto-restart
@@ -38,22 +42,30 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = lang;
-        recognition.maxAlternatives = 1;
+        // Ask for several alternatives. The engine uses the extra hypotheses
+        // to improve its top pick, which helps with accented / non-native
+        // speech; we still display alternative[0] but track its confidence.
+        recognition.maxAlternatives = 5;
 
         recognition.onresult = (event) => {
             let interim = '';
             let finalized = '';
+            let lastConfidence = null;
             for (let i = event.resultIndex; i < event.results.length; i += 1) {
                 const result = event.results[i];
                 const transcript = result[0].transcript;
                 if (result.isFinal) {
                     finalized += transcript;
+                    if (typeof result[0].confidence === 'number') {
+                        lastConfidence = result[0].confidence;
+                    }
                 } else {
                     interim += transcript;
                 }
             }
             if (finalized) {
                 setFinalText((prev) => (prev + ' ' + finalized.trim()).trim());
+                if (lastConfidence !== null) setConfidence(lastConfidence);
             }
             setInterimText(interim);
         };
@@ -108,6 +120,7 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
         setFinalText('');
         setInterimText('');
         setError(null);
+        setConfidence(null);
     }, []);
 
     // Update language on the live instance if it changes.
@@ -129,5 +142,5 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
         };
     }, []);
 
-    return { supported, listening, finalText, interimText, error, start, stop, reset };
+    return { supported, listening, finalText, interimText, error, confidence, start, stop, reset };
 }
