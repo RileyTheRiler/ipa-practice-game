@@ -18,22 +18,23 @@ const VOWEL_CHARS = 'iɪeɛæəʌɑɔoʊuaɝɚɒɜ';
 // /ɹ/ and must be kept (e.g. "very" /ˈvɛɹi/, "carry").
 const CODA = `(?![${VOWEL_CHARS}])`;
 
+// Pre-compile the non-rhotic substitutions once at module load (ordered:
+// longest/most-specific r-coloured vowels first, then bare coda /ɹ/ dropped).
+const NON_RHOTIC_RULES = [
+    [new RegExp(`aɪɹ${CODA}`, 'g'), 'aɪə'],
+    [new RegExp(`aʊɹ${CODA}`, 'g'), 'aʊə'],
+    [new RegExp(`ɑɹ${CODA}`, 'g'), 'ɑː'],
+    [new RegExp(`ɔɹ${CODA}`, 'g'), 'ɔː'],
+    [new RegExp(`ɛɹ${CODA}`, 'g'), 'ɛə'],
+    [new RegExp(`ɪɹ${CODA}`, 'g'), 'ɪə'],
+    [new RegExp(`ʊɹ${CODA}`, 'g'), 'ʊə'],
+    [/ɝ/g, 'ɜː'],
+    [/ɚ/g, 'ə'],
+    [new RegExp(`ɹ${CODA}`, 'g'), ''],
+];
+
 function nonRhotic(ipa) {
-    let s = ipa;
-    // R-coloured vowels first (longest/most specific first), coda position only.
-    s = s
-        .replace(new RegExp(`aɪɹ${CODA}`, 'g'), 'aɪə')
-        .replace(new RegExp(`aʊɹ${CODA}`, 'g'), 'aʊə')
-        .replace(new RegExp(`ɑɹ${CODA}`, 'g'), 'ɑː')
-        .replace(new RegExp(`ɔɹ${CODA}`, 'g'), 'ɔː')
-        .replace(new RegExp(`ɛɹ${CODA}`, 'g'), 'ɛə')
-        .replace(new RegExp(`ɪɹ${CODA}`, 'g'), 'ɪə')
-        .replace(new RegExp(`ʊɹ${CODA}`, 'g'), 'ʊə')
-        .replace(/ɝ/g, 'ɜː')
-        .replace(/ɚ/g, 'ə');
-    // Any remaining coda /ɹ/ (not before a vowel) is dropped.
-    s = s.replace(new RegExp(`ɹ${CODA}`, 'g'), '');
-    return s;
+    return NON_RHOTIC_RULES.reduce((s, [pattern, replacement]) => s.replace(pattern, replacement), ipa);
 }
 
 export const accents = [

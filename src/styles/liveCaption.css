@@ -162,6 +162,12 @@
     border-radius: var(--radius-sm);
 }
 
+.caption-word:not(:disabled):focus-visible {
+    outline: 2px solid var(--color-consonant);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
 .caption-word:disabled {
     cursor: default;
 }
@@ -322,6 +328,11 @@
 .lc-segmented button.active {
     background: var(--color-consonant);
     color: #fff;
+}
+
+.lc-segmented button:focus-visible {
+    outline: 2px solid var(--color-consonant);
+    outline-offset: 2px;
 }
 
 .lc-note {
