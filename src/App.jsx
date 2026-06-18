@@ -14,6 +14,14 @@ function App() {
     const [gameMode, setGameMode] = useState('wordToIpa');
     const [currentLevel, setCurrentLevel] = useState('level1');
     const [results, setResults] = useState(null);
+    // Remember where Live Captions was opened from, so "Back" returns there.
+    const [liveCaptionFrom, setLiveCaptionFrom] = useState('home');
+
+    /** Open the live-caption screen, remembering the originating screen. */
+    const openLiveCaption = (from) => {
+        setLiveCaptionFrom(from);
+        setScreen('liveCaption');
+    };
 
     /** Configure and launch a quiz session. */
     const startQuiz = (mode, level) => {
@@ -30,6 +38,7 @@ function App() {
                     <GamePicker
                         onPickHangman={() => setScreen('hangman')}
                         onPickQuiz={() => setScreen('quizMenu')}
+                        onPickLiveCaption={() => openLiveCaption('home')}
                     />
                 );
 
@@ -42,7 +51,7 @@ function App() {
                         onStartGame={startQuiz}
                         onStartTimedMode={() => setScreen('timed')}
                         onOpenLearnMode={() => setScreen('learn')}
-                        onOpenLiveCaption={() => setScreen('liveCaption')}
+                        onOpenLiveCaption={() => openLiveCaption('quizMenu')}
                         onBack={() => setScreen('home')}
                     />
                 );
@@ -72,7 +81,7 @@ function App() {
                 return <LearnMode onBack={() => setScreen('quizMenu')} />;
 
             case 'liveCaption':
-                return <LiveCaptionMode onBack={() => setScreen('quizMenu')} />;
+                return <LiveCaptionMode onBack={() => setScreen(liveCaptionFrom)} />;
 
             case 'results':
                 return (
@@ -91,6 +100,7 @@ function App() {
                     <GamePicker
                         onPickHangman={() => setScreen('hangman')}
                         onPickQuiz={() => setScreen('quizMenu')}
+                        onPickLiveCaption={() => openLiveCaption('home')}
                     />
                 );
         }
