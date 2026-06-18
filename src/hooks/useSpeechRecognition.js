@@ -17,8 +17,36 @@ const SpeechRecognition =
         ? window.SpeechRecognition || window.webkitSpeechRecognition
         : null;
 
-// Join two transcript fragments with a single separating space.
-const joinText = (a, b) => (a && b ? `${a} ${b}` : a || b);
+/**
+ * Merge already-committed transcript text with the current recognition
+ * session's finalized text, removing any replayed overlap.
+ *
+ * Some mobile speech engines (Android Chrome) re-emit previously finalized
+ * words at the START of each new recognition session after an auto-restart.
+ * A naive `committed + session` concatenation double-counts those words,
+ * producing the "said once, shown several times" bug. This merge finds the
+ * largest run of words where the tail of `committed` equals the head of
+ * `session` and appends only the non-overlapping remainder. Engines that
+ * reset cleanly (no replay) simply have zero overlap and append normally.
+ */
+export function mergeTranscript(committed, session) {
+    const a = committed ? committed.trim().split(/\s+/) : [];
+    const b = session ? session.trim().split(/\s+/) : [];
+    if (a.length === 0) return b.join(' ');
+    if (b.length === 0) return a.join(' ');
+
+    const maxK = Math.min(a.length, b.length);
+    let overlap = 0;
+    for (let k = maxK; k > 0; k -= 1) {
+        const tail = a.slice(-k).join(' ').toLowerCase();
+        const head = b.slice(0, k).join(' ').toLowerCase();
+        if (tail === head) {
+            overlap = k;
+            break;
+        }
+    }
+    return a.concat(b.slice(overlap)).join(' ');
+}
 
 export function useSpeechRecognition({ lang = 'en-US' } = {}) {
     const supported = Boolean(SpeechRecognition);
@@ -79,7 +107,9 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
                 }
             }
             sessionFinalRef.current = sessionFinal.trim();
-            setFinalText(joinText(committedRef.current, sessionFinalRef.current));
+            // Merge (not append) so words the engine replays at the start of a
+            // restarted session are not duplicated.
+            setFinalText(mergeTranscript(committedRef.current, sessionFinalRef.current));
             if (lastConfidence !== null) setConfidence(lastConfidence);
             setInterimText(interim);
         };
@@ -96,7 +126,7 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
             // Commit this session's final text before the engine clears its
             // results list, then clear the per-session buffer so a duplicate
             // onend (or replay) can't commit the same text twice.
-            committedRef.current = joinText(committedRef.current, sessionFinalRef.current);
+            committedRef.current = mergeTranscript(committedRef.current, sessionFinalRef.current);
             sessionFinalRef.current = '';
             // Auto-restart if the user hasn't explicitly stopped.
             if (keepAliveRef.current) {
