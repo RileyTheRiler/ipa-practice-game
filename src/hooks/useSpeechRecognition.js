@@ -17,6 +17,9 @@ const SpeechRecognition =
         ? window.SpeechRecognition || window.webkitSpeechRecognition
         : null;
 
+// Join two transcript fragments with a single separating space.
+const joinText = (a, b) => (a && b ? `${a} ${b}` : a || b);
+
 export function useSpeechRecognition({ lang = 'en-US' } = {}) {
     const supported = Boolean(SpeechRecognition);
     const [listening, setListening] = useState(false);
@@ -32,6 +35,16 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
     // Track whether the user intends to keep listening, so we can auto-restart
     // when the engine times out (it stops on its own after a pause).
     const keepAliveRef = useRef(false);
+    // Final text committed from PRIOR recognition sessions (i.e. everything from
+    // before the most recent auto-restart). The engine resets its results list
+    // on each restart, so we accumulate finalized text here across restarts.
+    const committedRef = useRef('');
+    // Final text for the CURRENT session. We rebuild this from the full results
+    // list on every result event rather than appending deltas — some mobile
+    // engines (notably Android Chrome) replay already-finalized results with a
+    // stale resultIndex, and delta-appending turns those replays into duplicated
+    // phrases. Rebuilding from scratch makes repeated events idempotent.
+    const sessionFinalRef = useRef('');
 
     // Lazily create and configure the recognition instance.
     const getRecognition = useCallback(() => {
@@ -48,14 +61,16 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
         recognition.maxAlternatives = 5;
 
         recognition.onresult = (event) => {
+            // Rebuild the whole session from the cumulative results list each
+            // time (idempotent), instead of appending only new results.
             let interim = '';
-            let finalized = '';
+            let sessionFinal = '';
             let lastConfidence = null;
-            for (let i = event.resultIndex; i < event.results.length; i += 1) {
+            for (let i = 0; i < event.results.length; i += 1) {
                 const result = event.results[i];
                 const transcript = result[0].transcript;
                 if (result.isFinal) {
-                    finalized += transcript;
+                    sessionFinal += transcript;
                     if (typeof result[0].confidence === 'number') {
                         lastConfidence = result[0].confidence;
                     }
@@ -63,10 +78,9 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
                     interim += transcript;
                 }
             }
-            if (finalized) {
-                setFinalText((prev) => (prev + ' ' + finalized.trim()).trim());
-                if (lastConfidence !== null) setConfidence(lastConfidence);
-            }
+            sessionFinalRef.current = sessionFinal.trim();
+            setFinalText(joinText(committedRef.current, sessionFinalRef.current));
+            if (lastConfidence !== null) setConfidence(lastConfidence);
             setInterimText(interim);
         };
 
@@ -79,6 +93,11 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
 
         recognition.onend = () => {
             setInterimText('');
+            // Commit this session's final text before the engine clears its
+            // results list, then clear the per-session buffer so a duplicate
+            // onend (or replay) can't commit the same text twice.
+            committedRef.current = joinText(committedRef.current, sessionFinalRef.current);
+            sessionFinalRef.current = '';
             // Auto-restart if the user hasn't explicitly stopped.
             if (keepAliveRef.current) {
                 try {
@@ -117,6 +136,8 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
     }, []);
 
     const reset = useCallback(() => {
+        committedRef.current = '';
+        sessionFinalRef.current = '';
         setFinalText('');
         setInterimText('');
         setError(null);
