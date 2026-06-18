@@ -1,171 +1,101 @@
-import { useState, useEffect } from 'react';
-import { useGameState } from './hooks/useGameState';
+import { useState } from 'react';
 import TitleScreen from './components/TitleScreen';
-import MenuScreen from './components/MenuScreen';
+import GamePicker from './components/GamePicker';
+import QuizMenu from './components/QuizMenu';
 import MultipleChoiceGame from './components/MultipleChoiceGame';
+import HangmanGame from './components/HangmanGame';
 import ResultsScreen from './components/ResultsScreen';
 import TimedMode from './components/TimedMode';
 import LearnMode from './components/LearnMode';
 import LiveCaptionMode from './components/LiveCaptionMode';
-import { AchievementToastQueue } from './components/AchievementToast';
-import { checkAchievements } from './data/achievements';
 import './index.css';
 
 function App() {
-  const {
-    state,
-    goToScreen,
-    startGame,
-    updateInput,
-    addToInput,
-    backspace,
-    clearInput,
-    submitAnswer,
-    nextWord,
-    endGame,
-    resetProgress,
-  } = useGameState();
+    const [screen, setScreen] = useState('title');
+    const [gameMode, setGameMode] = useState('wordToIpa');
+    const [currentLevel, setCurrentLevel] = useState('level1');
+    const [results, setResults] = useState(null);
 
-  const [currentScreen, setCurrentScreen] = useState(state.screen);
-  const [newAchievements, setNewAchievements] = useState([]);
+    /** Configure and launch a quiz session. */
+    const startQuiz = (mode, level) => {
+        setGameMode(mode);
+        setCurrentLevel(level);
+        setScreen('quizGame');
+    };
 
-  // Sync screen state
-  useEffect(() => {
-    setCurrentScreen(state.screen);
-  }, [state.screen]);
+    /** Pick the component for the active screen. */
+    const renderScreen = () => {
+        switch (screen) {
+            case 'title':
+                return <TitleScreen onStart={() => setScreen('home')} />;
 
-  // Check for achievements after each answer
-  useEffect(() => {
-    if (state.showFeedback) {
-      const unlocked = checkAchievements(state);
-      if (unlocked.length > 0) {
-        setNewAchievements(unlocked);
-      }
-    }
-  }, [state.showFeedback, state]);
+            case 'home':
+                return (
+                    <GamePicker
+                        onPickHangman={() => setScreen('hangman')}
+                        onPickQuiz={() => setScreen('quizMenu')}
+                    />
+                );
 
-  const handleStartTimedMode = () => {
-    setCurrentScreen('timed');
-  };
+            case 'hangman':
+                return <HangmanGame onBack={() => setScreen('home')} />;
 
-  const handleStartDailyChallenge = () => {
-    // For now, start a regular game with mixed levels
-    startGame('wordToIpa', 'level1');
-  };
+            case 'quizMenu':
+                return (
+                    <QuizMenu
+                        onStartGame={startQuiz}
+                        onStartTimedMode={() => setScreen('timed')}
+                        onOpenLearnMode={() => setScreen('learn')}
+                        onOpenLiveCaption={() => setScreen('liveCaption')}
+                        onBack={() => setScreen('home')}
+                    />
+                );
 
-  const handleOpenLearnMode = () => {
-    setCurrentScreen('learn');
-  };
+            case 'quizGame':
+                return (
+                    <MultipleChoiceGame
+                        gameMode={gameMode}
+                        currentLevel={currentLevel}
+                        onEndGame={(stats) => {
+                            setResults(stats);
+                            setScreen('results');
+                        }}
+                        onBack={() => setScreen('quizMenu')}
+                    />
+                );
 
-  const handleOpenLiveCaption = () => {
-    setCurrentScreen('liveCaption');
-  };
+            case 'timed':
+                return (
+                    <TimedMode
+                        onEnd={() => setScreen('quizMenu')}
+                        onBack={() => setScreen('quizMenu')}
+                    />
+                );
 
-  const handleTimedModeEnd = (score, correctCount) => {
-    // Check achievements for timed mode
-    const unlocked = checkAchievements({
-      ...state,
-      timedModeScore: correctCount
-    });
-    if (unlocked.length > 0) {
-      setNewAchievements(unlocked);
-    }
-    setCurrentScreen('menu');
-  };
+            case 'learn':
+                return <LearnMode onBack={() => setScreen('quizMenu')} />;
 
-  const handleAchievementComplete = () => {
-    setNewAchievements([]);
-  };
+            case 'liveCaption':
+                return <LiveCaptionMode onBack={() => setScreen('quizMenu')} />;
 
-  // Render based on current screen
-  const renderScreen = () => {
-    switch (currentScreen) {
-      case 'title':
-        return (
-          <TitleScreen
-            onStart={() => goToScreen('menu')}
-          />
-        );
+            case 'results':
+                return (
+                    <ResultsScreen
+                        score={results?.score ?? 0}
+                        correctAnswers={results?.correctCount ?? 0}
+                        wrongAnswers={results?.wrongCount ?? 0}
+                        bestStreak={results?.bestStreak ?? 0}
+                        onPlayAgain={() => startQuiz(gameMode, currentLevel)}
+                        onBackToMenu={() => setScreen('quizMenu')}
+                    />
+                );
 
-      case 'menu':
-        return (
-          <MenuScreen
-            onStartGame={startGame}
-            onStartTimedMode={handleStartTimedMode}
-            onStartDailyChallenge={handleStartDailyChallenge}
-            onOpenLearnMode={handleOpenLearnMode}
-            onOpenLiveCaption={handleOpenLiveCaption}
-            unlockedLevels={state.unlockedLevels}
-            levelProgress={state.levelProgress}
-            bestStreak={state.bestStreak}
-            onResetProgress={resetProgress}
-          />
-        );
+            default:
+                return <TitleScreen onStart={() => setScreen('home')} />;
+        }
+    };
 
-      case 'game':
-        return (
-          <MultipleChoiceGame
-            gameMode={state.gameMode}
-            currentLevel={state.currentLevel}
-            onScoreUpdate={(stats) => {
-              // Update state with new stats if needed
-            }}
-            onEndGame={endGame}
-            onBack={() => goToScreen('menu')}
-          />
-        );
-
-      case 'timed':
-        return (
-          <TimedMode
-            onEnd={handleTimedModeEnd}
-            onBack={() => setCurrentScreen('menu')}
-          />
-        );
-
-      case 'learn':
-        return (
-          <LearnMode
-            onBack={() => setCurrentScreen('menu')}
-          />
-        );
-
-      case 'liveCaption':
-        return (
-          <LiveCaptionMode
-            onBack={() => setCurrentScreen('menu')}
-          />
-        );
-
-      case 'results':
-        return (
-          <ResultsScreen
-            score={state.score}
-            correctAnswers={state.correctAnswers}
-            wrongAnswers={state.wrongAnswers}
-            bestStreak={state.bestStreak}
-            currentLevel={state.currentLevel}
-            levelProgress={state.levelProgress}
-            onPlayAgain={() => startGame(state.gameMode, state.currentLevel)}
-            onBackToMenu={() => goToScreen('menu')}
-          />
-        );
-
-      default:
-        return <TitleScreen onStart={() => goToScreen('menu')} />;
-    }
-  };
-
-  return (
-    <div className="app">
-      {renderScreen()}
-      <AchievementToastQueue
-        achievements={newAchievements}
-        onComplete={handleAchievementComplete}
-      />
-    </div>
-  );
+    return <div className="app">{renderScreen()}</div>;
 }
 
 export default App;
-

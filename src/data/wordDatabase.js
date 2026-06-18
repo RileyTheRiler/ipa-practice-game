@@ -182,9 +182,29 @@ export const levelInfo = {
     },
 };
 
-// Get a random word from a specific level
+// Every word across all levels (used by "all difficulties" pools).
+/** @returns {{word: string, ipa: string, hint: string}[]} every word in the database. */
+export const getAllWords = () => Object.values(wordDatabase).flat();
+
+// Get the word pool for a level, or every word when level is 'all'.
+/**
+ * @param {string} level - A level key, or 'all' for every word.
+ * @returns {{word: string, ipa: string, hint: string}[]} the matching word pool.
+ */
+export const getWordPool = (level) =>
+    level === 'all' ? getAllWords() : (wordDatabase[level] || []);
+
+// Get a random word from a specific level (or 'all' levels).
+/**
+ * @param {string} level - A level key, or 'all' for every word.
+ * @returns {{word: string, ipa: string, hint: string}} a random word from the pool.
+ * @throws {Error} when the requested pool is empty.
+ */
 export const getRandomWord = (level) => {
-    const words = wordDatabase[level];
+    const words = getWordPool(level);
+    if (!words.length) {
+        throw new Error(`No words available for level "${level}"`);
+    }
     return words[Math.floor(Math.random() * words.length)];
 };
 

@@ -172,7 +172,15 @@ export function MultipleChoiceGame({
                         </div>
                     )}
 
-                    <button className="btn btn-ghost" onClick={onEndGame}>
+                    <button
+                        className="btn btn-ghost"
+                        onClick={() => onEndGame?.({
+                            score,
+                            correctCount,
+                            wrongCount: questionCount - correctCount,
+                            bestStreak,
+                        })}
+                    >
                         End Session
                     </button>
                 </div>
