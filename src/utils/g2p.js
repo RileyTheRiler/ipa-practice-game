@@ -113,6 +113,33 @@ const COMMON_WORDS = {
     driven: 'ˈdɹɪvən', ridden: 'ˈɹɪdən', written: 'ˈɹɪtən', chose: 'tʃoʊz',
     chosen: 'ˈtʃoʊzən', broken: 'ˈbɹoʊkən', woken: 'ˈwoʊkən',
     forgot: 'fɚˈɡɑt', forgotten: 'fɚˈɡɑtən', forgave: 'fɚˈɡeɪv',
+
+    // "-ow" digraph is genuinely ambiguous from spelling alone: the rule
+    // `ow -> aʊ` is right for cow/how/now/down, but wrong for this large
+    // class where "ow" is actually /oʊ/.
+    blow: 'bloʊ', grow: 'ɡɹoʊ', slow: 'sloʊ', flow: 'floʊ', glow: 'ɡloʊ',
+    low: 'loʊ', snow: 'snoʊ', row: 'ɹoʊ', crow: 'kɹoʊ', mow: 'moʊ',
+    sow: 'soʊ', tow: 'toʊ', throw: 'θɹoʊ', narrow: 'ˈnæɹoʊ',
+    tomorrow: 'təˈmɔɹoʊ', window: 'ˈwɪndoʊ', yellow: 'ˈjɛloʊ',
+    shadow: 'ˈʃædoʊ', arrow: 'ˈæɹoʊ', borrow: 'ˈbɔɹoʊ', sorrow: 'ˈsɔɹoʊ',
+    widow: 'ˈwɪdoʊ', elbow: 'ˈɛlboʊ', rainbow: 'ˈɹeɪnboʊ',
+    shallow: 'ˈʃæloʊ', hollow: 'ˈhɑloʊ', swallow: 'ˈswɑloʊ',
+    willow: 'ˈwɪloʊ', fellow: 'ˈfɛloʊ', mellow: 'ˈmɛloʊ', bellow: 'ˈbɛloʊ',
+    pillow: 'ˈpɪloʊ', billow: 'ˈbɪloʊ',
+
+    // Doubled "gg" before e/i/y: the soft-g lookahead rule fires a second
+    // time on the trailing "g" as if it were starting a new syllable,
+    // wrongly adding /dʒ/ (e.g. "bigger" -> /bɪɡdʒɚ/ instead of /ˈbɪɡɚ/).
+    // This only affects native-English doubling (hard /ɡ/ throughout);
+    // Latinate words like "suggest"/"exaggerate" genuinely do have the
+    // /ɡdʒ/ split, so the rule is intentionally left as-is and these
+    // common offenders are overridden individually instead.
+    bigger: 'ˈbɪɡɚ', biggest: 'ˈbɪɡɪst', digger: 'ˈdɪɡɚ', dagger: 'ˈdæɡɚ',
+    trigger: 'ˈtɹɪɡɚ', stagger: 'ˈstæɡɚ', swagger: 'ˈswæɡɚ',
+    jogger: 'ˈdʒɑɡɚ', logger: 'ˈlɔɡɚ', mugger: 'ˈmʌɡɚ', nugget: 'ˈnʌɡɪt',
+    foggy: 'ˈfɑɡi', soggy: 'ˈsɑɡi', buggy: 'ˈbʌɡi', doggy: 'ˈdɔɡi',
+    shaggy: 'ˈʃæɡi', groggy: 'ˈɡɹɑɡi', baggy: 'ˈbæɡi', saggy: 'ˈsæɡi',
+    piggy: 'ˈpɪɡi',
 };
 
 // --- Build the lookup dictionary --------------------------------------------
