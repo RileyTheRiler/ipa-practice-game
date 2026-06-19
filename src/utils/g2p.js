@@ -168,6 +168,23 @@ const COMMON_WORDS = {
     // irregular vowel/stress that the rule fix alone can't get right.
     yummy: 'ˈjʌmi', yesterday: 'ˈjɛstɚdeɪ', yoga: 'ˈjoʊɡə', yikes: 'jaɪks',
     young: 'jʌŋ',
+
+    // "-ose" magic-e words are voiced /z/, not the default voiceless /s/
+    // the rule engine assumes; the "th" digraph rule always gives the
+    // voiceless /θ/, with no way to tell these voiced exceptions apart
+    // from spelling alone.
+    those: 'ðoʊz', rose: 'ɹoʊz', nose: 'noʊz', pose: 'poʊz', hose: 'hoʊz',
+    prose: 'pɹoʊz', arose: 'əˈɹoʊz', suppose: 'səˈpoʊz', oppose: 'əˈpoʊz',
+    expose: 'ɪkˈspoʊz', compose: 'kəmˈpoʊz', dispose: 'dɪˈspoʊz',
+    impose: 'ɪmˈpoʊz', purpose: 'ˈpɜɹpəs', thus: 'ðʌs',
+    therefore: 'ˈðɛɹfɔɹ', themselves: 'ðɛmˈsɛlvz', smooth: 'smuð',
+    bathe: 'beɪð', clothe: 'kloʊð', soothe: 'suð',
+
+    // "wor-" + consonant is r-colored as /wɜɹ/ ("word", "work"), not the
+    // /wɔɹ/ the generic "or" digraph rule gives — but "wore"/"worn" (forms
+    // of "wear") really are /wɔɹ/, so this can't be a blanket rule.
+    worth: 'wɜɹθ', worse: 'wɜɹs', worst: 'wɜɹst', worm: 'wɜɹm',
+    worship: 'ˈwɜɹʃɪp', worthy: 'ˈwɜɹði', worry: 'ˈwɜɹi',
 };
 
 // --- Build the lookup dictionary --------------------------------------------
@@ -308,8 +325,13 @@ export function transcribeWord(token, lang = 'en') {
     if (clean.endsWith('s') && dictionary[clean.slice(0, -1)]) {
         const base = dictionary[clean.slice(0, -1)];
         const last = base[base.length - 1];
+        // After a sibilant (s/z/sh/zh, including the "ʒ" tail of tʃ/dʒ) the
+        // suffix needs an epenthetic vowel ("practice" -> "practices" =
+        // /ˈpɹæktɪsɪz/, not /ˈpɹæktɪsz/), not just voicing agreement.
+        const sibilant = 'szʃʒ'.includes(last);
         const voiceless = 'ptkfθ'.includes(last);
-        return { ipa: base + (voiceless ? 's' : 'z'), source: 'dictionary' };
+        const suffix = sibilant ? 'ɪz' : (voiceless ? 's' : 'z');
+        return { ipa: base + suffix, source: 'dictionary' };
     }
     // Try without trailing 'ed'.
     if (clean.endsWith('ed') && dictionary[clean.slice(0, -2)]) {
