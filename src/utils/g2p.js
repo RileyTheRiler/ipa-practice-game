@@ -75,6 +75,44 @@ const COMMON_WORDS = {
     // /pɹæktaɪk/ since it has no notion of syllable stress.
     practice: 'ˈpɹæktɪs', notice: 'ˈnoʊtɪs', justice: 'ˈdʒʌstɪs',
     office: 'ˈɔfɪs', service: 'ˈsɜɹvɪs', promise: 'ˈpɹɑmɪs',
+
+    // Silent letters / unpredictable letter combos the rules can't see
+    // coming (e.g. "mb", "lk", "lm" with a dropped consonant, "gh", "stl").
+    comb: 'koʊm', climb: 'klaɪm', tomb: 'tum', womb: 'wum', debt: 'dɛt',
+    whistle: 'ˈwɪsəl', often: 'ˈɔfən', soften: 'ˈsɔfən', fasten: 'ˈfæsən',
+    christmas: 'ˈkɹɪsməs', sword: 'sɔɹd', half: 'hæf', calf: 'kæf',
+    talk: 'tɔk', chalk: 'tʃɔk', salmon: 'ˈsæmən', almond: 'ˈɑmənd',
+    yolk: 'joʊk', folk: 'foʊk', palm: 'pɑm', calm: 'kɑm', psalm: 'sɑm',
+    autumn: 'ˈɔtəm', column: 'ˈkɑləm', hymn: 'hɪm', solemn: 'ˈsɑləm',
+    condemn: 'kənˈdɛm',
+
+    // Irregular vowel spellings — "ea", "oo", "gu-", "ould", etc. don't
+    // reduce to one predictable sound, so each needs its own entry.
+    women: 'ˈwɪmɪn', busy: 'ˈbɪzi', business: 'ˈbɪznəs', build: 'bɪld',
+    guard: 'ɡɑɹd', guide: 'ɡaɪd', guess: 'ɡɛs', guest: 'ɡɛst',
+    guitar: 'ɡɪˈtɑɹ', key: 'ki', money: 'ˈmʌni', honey: 'ˈhʌni',
+    sugar: 'ˈʃʊɡɚ', sure: 'ʃʊɹ', break: 'bɹeɪk', steak: 'steɪk',
+    bread: 'bɹɛd', dead: 'dɛd', heart: 'hɑɹt', blood: 'blʌd',
+    flood: 'flʌd', friend: 'fɹɛnd', gone: 'ɡɔn', done: 'dʌn', none: 'nʌn',
+    shoe: 'ʃu', whose: 'huz', lose: 'luz', choose: 'tʃuz', prove: 'pɹuv',
+    machine: 'məˈʃin', ocean: 'ˈoʊʃən', special: 'ˈspɛʃəl',
+    ancient: 'ˈeɪnʃənt', vision: 'ˈvɪʒən', usual: 'ˈjuʒuəl',
+    although: 'ɔlˈðoʊ', enough: 'ɪˈnʌf', laugh: 'læf', daughter: 'ˈdɔtɚ',
+    neighbor: 'ˈneɪbɚ', height: 'haɪt', tongue: 'tʌŋ', iron: 'ˈaɪɚn',
+    yacht: 'jɑt',
+
+    // Irregular verb forms — past tense / participles that don't follow
+    // the regular -ed pattern, so the rule engine has nothing to go on.
+    love: 'lʌv', believe: 'bɪˈliv', achieve: 'əˈtʃiv', receive: 'ɹɪˈsiv',
+    given: 'ˈɡɪvən', took: 'tʊk', taken: 'ˈteɪkən', became: 'bɪˈkeɪm',
+    become: 'bɪˈkʌm', began: 'bɪˈɡæn', begun: 'bɪˈɡʌn', eaten: 'ˈitən',
+    drank: 'dɹæŋk', drunk: 'dɹʌŋk', spoken: 'ˈspoʊkən', sold: 'soʊld',
+    told: 'toʊld', lost: 'lɔst', won: 'wʌn', stood: 'stʊd',
+    understood: 'ˌʌndɚˈstʊd', fell: 'fɛl', fallen: 'ˈfɔlən',
+    grown: 'ɡɹoʊn', known: 'noʊn', thrown: 'θɹoʊn', flown: 'floʊn',
+    driven: 'ˈdɹɪvən', ridden: 'ˈɹɪdən', written: 'ˈɹɪtən', chose: 'tʃoʊz',
+    chosen: 'ˈtʃoʊzən', broken: 'ˈbɹoʊkən', woken: 'ˈwoʊkən',
+    forgot: 'fɚˈɡɑt', forgotten: 'fɚˈɡɑtən', forgave: 'fɚˈɡeɪv',
 };
 
 // --- Build the lookup dictionary --------------------------------------------
