@@ -90,11 +90,17 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
     const sessionFinalRef = useRef('');
     // Pending timer for re-arming the recognizer between utterances.
     const restartTimerRef = useRef(null);
+    const langRef = useRef(lang);
+    langRef.current = lang;
 
-    // Lazily create and configure the recognition instance.
-    const getRecognition = useCallback(() => {
+    // Build a brand-new recognition instance for every session (the initial
+    // start() and every auto-restart in onend), rather than reusing one
+    // forever. Reusing a single instance across multiple start() calls is a
+    // known source of Chrome silently stopping emitting onresult events
+    // after the first session while still reporting itself as listening —
+    // i.e. the mic looks "on" but nothing further is ever transcribed.
+    const createRecognition = useCallback(() => {
         if (!supported) return null;
-        if (recognitionRef.current) return recognitionRef.current;
 
         const recognition = new SpeechRecognition();
         // Non-continuous: recognize a single utterance per session, then stop.
@@ -105,7 +111,7 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
         // recognizer in onend to keep an effectively continuous experience.
         recognition.continuous = false;
         recognition.interimResults = true;
-        recognition.lang = lang;
+        recognition.lang = langRef.current;
         // Ask for several alternatives. The engine uses the extra hypotheses
         // to improve its top pick, which helps with accented / non-native
         // speech; we still display alternative[0] but track its confidence.
@@ -122,11 +128,17 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
             let lastConfidence = null;
             for (let i = 0; i < event.results.length; i += 1) {
                 const result = event.results[i];
-                const transcript = result[0].transcript;
+                // Defend against engines that occasionally emit a result with
+                // no alternatives — without this guard an exception here
+                // would abort the handler before finalText/interimText are
+                // ever updated, with no visible error.
+                const alt = result && result[0];
+                if (!alt) continue;
+                const transcript = alt.transcript || '';
                 if (result.isFinal) {
                     finals.push(transcript);
-                    if (typeof result[0].confidence === 'number') {
-                        lastConfidence = result[0].confidence;
+                    if (typeof alt.confidence === 'number') {
+                        lastConfidence = alt.confidence;
                     }
                 } else {
                     interim += `${transcript} `;
@@ -161,8 +173,11 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
             if (keepAliveRef.current) {
                 restartTimerRef.current = setTimeout(() => {
                     if (!keepAliveRef.current) return;
+                    const next = createRecognition();
+                    if (!next) return;
+                    recognitionRef.current = next;
                     try {
-                        recognition.start();
+                        next.start();
                     } catch {
                         // start() throws if already started; ignore.
                     }
@@ -172,13 +187,13 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
             }
         };
 
-        recognitionRef.current = recognition;
         return recognition;
-    }, [supported, lang]);
+    }, [supported]);
 
     const start = useCallback(() => {
-        const recognition = getRecognition();
+        const recognition = createRecognition();
         if (!recognition) return;
+        recognitionRef.current = recognition;
         setError(null);
         keepAliveRef.current = true;
         try {
@@ -187,7 +202,7 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
         } catch {
             // Already started — ignore.
         }
-    }, [getRecognition]);
+    }, [createRecognition]);
 
     const stop = useCallback(() => {
         keepAliveRef.current = false;
@@ -196,7 +211,13 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
             restartTimerRef.current = null;
         }
         const recognition = recognitionRef.current;
-        if (recognition) recognition.stop();
+        if (recognition) {
+            try {
+                recognition.stop();
+            } catch {
+                // Already stopped — ignore, but still reflect stopped state below.
+            }
+        }
         setListening(false);
         setInterimText('');
     }, []);
@@ -209,11 +230,6 @@ export function useSpeechRecognition({ lang = 'en-US' } = {}) {
         setError(null);
         setConfidence(null);
     }, []);
-
-    // Update language on the live instance if it changes.
-    useEffect(() => {
-        if (recognitionRef.current) recognitionRef.current.lang = lang;
-    }, [lang]);
 
     // Clean up on unmount.
     useEffect(() => {
