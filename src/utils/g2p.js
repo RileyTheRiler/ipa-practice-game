@@ -140,6 +140,34 @@ const COMMON_WORDS = {
     foggy: 'ˈfɑɡi', soggy: 'ˈsɑɡi', buggy: 'ˈbʌɡi', doggy: 'ˈdɔɡi',
     shaggy: 'ˈʃæɡi', groggy: 'ˈɡɹɑɡi', baggy: 'ˈbæɡi', saggy: 'ˈsæɡi',
     piggy: 'ˈpɪɡi',
+
+    // "-ance"/-ence"/-ince" magic-e words keep a SHORT vowel despite the
+    // trailing silent e (unlike "face"/"race"/"rage", which do lengthen) —
+    // a lexical quirk the magic-e rule has no way to predict.
+    dance: 'dæns', chance: 'tʃæns', france: 'fɹæns', lance: 'læns',
+    glance: 'ɡlæns', advance: 'ædˈvæns', stance: 'stæns', fence: 'fɛns',
+    since: 'sɪns', prince: 'pɹɪns', announce: 'əˈnaʊns',
+    pronounce: 'pɹəˈnaʊns',
+
+    // "ough"/"oul" spellings: silent gh (oʊ), pronounced gh (/f/), or an
+    // /u/, /ʌ/, /oʊ/ vowel that the generic "ou -> aʊ" rule can't predict.
+    dough: 'doʊ', doughnut: 'ˈdoʊnʌt', tough: 'tʌf', borough: 'ˈbɜɹoʊ',
+    youth: 'juθ', group: 'ɡɹup', soup: 'sup', touch: 'tʌtʃ',
+    double: 'ˈdʌbəl', trouble: 'ˈtɹʌbəl', couple: 'ˈkʌpəl',
+    cousin: 'ˈkʌzən', soul: 'soʊl', shoulder: 'ˈʃoʊldɚ', boulder: 'ˈboʊldɚ',
+
+    // "our"/r-colored vowel ambiguity: /ɔɹ/ (four, court), /ʊɹ/ (tour), or
+    // /aʊɚ/ (hour, flour) depending on the word — unpredictable from
+    // spelling, and the silent leading "h" in "hour" compounds it.
+    four: 'fɔɹ', pour: 'pɔɹ', court: 'kɔɹt', course: 'kɔɹs',
+    source: 'sɔɹs', mourn: 'mɔɹn', fourth: 'fɔɹθ', resource: 'ˈɹisɔɹs',
+    tour: 'tʊɹ', detour: 'ˈditʊɹ', hour: 'aʊɚ', devour: 'dɪˈvaʊɚ',
+    flour: 'ˈflaʊɚ',
+
+    // Word-initial "y" + vowel words where the base form also has its own
+    // irregular vowel/stress that the rule fix alone can't get right.
+    yummy: 'ˈjʌmi', yesterday: 'ˈjɛstɚdeɪ', yoga: 'ˈjoʊɡə', yikes: 'jaɪks',
+    young: 'jʌŋ',
 };
 
 // --- Build the lookup dictionary --------------------------------------------
@@ -219,11 +247,26 @@ function ruleBasedG2P(word) {
         const rest = w.slice(i);
 
         // Soft c / soft g need a lookahead, handle before generic rules.
-        if (rest[0] === 'c' && isFrontVowel(rest[1])) { out += 's'; i += 1; continue; }
-        if (rest[0] === 'g' && isFrontVowel(rest[1])) { out += 'dʒ'; i += 1; continue; }
+        // A silent magic-e licenses softness too ("race", "huge"), but by
+        // this point it's already been stripped from `w` — so a "c"/"g" at
+        // the very end of the truncated word (nothing left to look ahead
+        // at) must be treated as if a front vowel still followed it.
+        const aheadIsFront = isFrontVowel(rest[1]) || (magicE && rest.length === 1);
+        if (rest[0] === 'c' && aheadIsFront) { out += 's'; i += 1; continue; }
+        if (rest[0] === 'g' && aheadIsFront) { out += 'dʒ'; i += 1; continue; }
+
+        // Word-initial "y" before a vowel is the consonant /j/ ("yard",
+        // "yawn"), not the vowel the generic single-letter rule below would
+        // give it. "y" as a vowel (happy, my, gym) never starts a word
+        // followed immediately by another vowel letter, so this is safe.
+        if (i === 0 && rest[0] === 'y' && /[aeiou]/.test(rest[1])) { out += 'j'; i += 1; continue; }
 
         // Magic-e lengthening: single vowel that is the last vowel of the word.
-        if (magicE && longVowel[rest[0]] && !/[aeiou]/.test(w.slice(i + 1))) {
+        // Skip it when the vowel is immediately followed by "r" ("force",
+        // "charge"): "ar"/"or" + silent e are r-colored, not lengthened, and
+        // are handled correctly by the r-colored vowel digraph rules below.
+        const beforeR = (rest[0] === 'a' || rest[0] === 'o') && rest[1] === 'r';
+        if (magicE && longVowel[rest[0]] && !beforeR && !/[aeiou]/.test(w.slice(i + 1))) {
             out += longVowel[rest[0]];
             i += 1;
             continue;
