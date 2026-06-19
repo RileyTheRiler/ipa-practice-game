@@ -68,6 +68,13 @@ const COMMON_WORDS = {
     once: 'wʌns', water: 'ˈwɔtɚ', been_there: 'bɪn', hello: 'həˈloʊ',
     yes: 'jɛs', okay: 'oʊˈkeɪ', ok: 'oʊˈkeɪ', hi: 'haɪ', bye: 'baɪ',
     one_two: 'wʌn', oh: 'oʊ', uh: 'ʌ', um: 'ʌm',
+    // Words ending in an unstressed "-ice"/"-ice"-style syllable. The
+    // rule-based fallback's magic-e rule assumes a trailing consonant + e
+    // always lengthens the preceding vowel (correct for monosyllables like
+    // "time"/"rice"), which wrongly turns these into e.g. "practice" ->
+    // /pɹæktaɪk/ since it has no notion of syllable stress.
+    practice: 'ˈpɹæktɪs', notice: 'ˈnoʊtɪs', justice: 'ˈdʒʌstɪs',
+    office: 'ˈɔfɪs', service: 'ˈsɜɹvɪs', promise: 'ˈpɹɑmɪs',
 };
 
 // --- Build the lookup dictionary --------------------------------------------
